@@ -1,6 +1,6 @@
 {
   "name": "mbl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Load images in sequence into background images with callbacks.",
   "repository": {
     "type": "git",
@@ -16,5 +16,12 @@
     "callbacks"
   ],
   "author": "Jon Gacnik <jon@folderstudio.com> (http://jongacnik.com/)",
-  "license": "ISC"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amongiants/mbl/issues"
+  },
+  "homepage": "https://github.com/amongiants/mbl",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
