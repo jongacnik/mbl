@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/amongiants/mbl"
   },
-  "main": "index.js",
+  "main": "mbl.js",
   "dependencies": {},
   "keywords": [
     "load",
