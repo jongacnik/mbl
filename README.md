@@ -1,10 +1,6 @@
 # MBL (Mad Basic Loader)
 
-Load images in sequence into background images with callbacks.
-
-## Overview
-
-MBL lets us use a data-src attribute on an element to load images in the DOM properly. Sort of like [imagesloaded](https://github.com/desandro/imagesloaded) without all the event emissions and with more control over image load order and where the images go. Images can be loaded all at once or sequentially, they can be rendered as an image or set as the background image of an element, and callbacks are fired as each image succeeds or fails, as well as once all images in a set have loaded.
+MBL lets us use a `data-src` attribute on an element to load images in the DOM properly. Sort of like [imagesloaded](https://github.com/desandro/imagesloaded) without all the event emissions and with more control over image load order and where the images go. Images can be loaded all at once or sequentially, they can be rendered as an image or set as the background image of an element, and callbacks are fired as each image succeeds or fails, as well as once all images in a set have loaded.
 
 ## Getting Started
 

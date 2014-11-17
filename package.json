@@ -1,7 +1,7 @@
 {
   "name": "mbl",
-  "version": "0.1.1",
-  "description": "Load images in sequence into background images with callbacks.",
+  "version": "0.1.2",
+  "description": "MBL (Mad Basic Loader) loads images",
   "repository": {
     "type": "git",
     "url": "https://github.com/amongiants/mbl"
