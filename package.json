@@ -1,0 +1,20 @@
+{
+  "name": "mbl",
+  "version": "0.1.0",
+  "description": "Load images in sequence into background images with callbacks.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amongiants/mbl"
+  },
+  "main": "index.js",
+  "dependencies": {},
+  "keywords": [
+    "load",
+    "images",
+    "preload",
+    "sequence",
+    "callbacks"
+  ],
+  "author": "Jon Gacnik <jon@folderstudio.com> (http://jongacnik.com/)",
+  "license": "ISC"
+}

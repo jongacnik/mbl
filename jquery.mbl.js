@@ -1,113 +1,100 @@
 /**
- * MBL ~ Mad Basic Loader
- * Desc : Loads images
+ * MBL ~ Mad Basic Loader (jQuery)
+ *
+ * Functionality: 
+ * - Loads images & fires callbacks
  */
- (function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['jquery'], factory);
-    } else if (typeof exports === 'object') {
-        // Node/CommonJS
-        factory(require('jquery'));
-    } else {
-        // Browser globals
-        factory(jQuery);
-    }
-}(function ($) {
-    
-    $.fn.mbl = function(Options) {
 
-    var Data = {
-      $mbl  : null,
-      total : 0,
-      count : 0
+(function (factory) {
+  if (typeof define === 'function' && define.amd)
+    define(['jquery'], factory);
+  else if (typeof exports === 'object')
+    factory(require('jquery'));
+  else
+    factory(jQuery);
+}(function($){
+    
+  $.fn.mbl = function(opts) {
+
+    var data = {
+      images : [],
+      total  : 0,
+      count  : 0
     };
 
-    var Self = {
+    var options = $.extend({
+      selector   : '[data-mbl]',
+      sequential : false,
+      bgMode     : false,
+      success    : function(i, elem){ }, // called on each image successful load
+      error      : function(i, elem){ }, // called on each image error
+      complete   : function(){ } // called once all images have completed (error/success agnostic)
+    }, opts);
 
-      Options: $.extend(true, {}, {
-        mblSelector : '.mbl',
-        sequential  : false,
-        bgMode      : false,
-        callbacks   : {
-          eachDone : function(i, ele) { console.log('image ' + i + ' done!'); },
-          eachFail : function(i, ele) { console.log('image ' + i + ' fail!'); },
-          allDone  : function() { console.log('All done!'); }
-        }
-      }, Options),
+    function init(ele){
+      data.images = ele.find(options.selector);
+      data.total = data.images.length;
+      kickoff();
+    };
 
-      Init : function(ele) {
-        
-        // Set cache & count 'em
-        Data.$mbl  = ele.find(Self.Options.mblSelector);
-        Data.total = Data.$mbl.length;
+    function kickoff(){
+      if(data.total <= 0)
+        options.complete();
+      else {
+        if(!options.sequential)
+          flood();
+        else
+          sequential();
+      }
+    };
 
-        // Kick off
-        if(Data.total <= 0)
-          Self.Options.callbacks.allDone();
-        else {
-          if(!Self.Options.sequential)
-            Self.FloodLoad();
+    function flood(){
+      for(var i = 0; i < data.total; i++)
+        loadImage(i);
+    };
+
+    function sequential(){
+      loadImage(0);
+    };
+
+    function loadImage(index){
+
+      if(index < data.total){
+
+        var $elem = $(data.images[index]);
+        var src   = $elem.attr('data-src');
+        var next  = index + 1;
+        var img   = new Image(); // create new image
+
+        // behavior on image load
+        $(img).one('load', function(){
+          if(!options.bgMode)
+            $(data.images[index]).attr('src',src);
           else
-            Self.SequentialLoad();
-        }
+            $elem.css('background-image', "url('" + src + "')");
+          $elem.attr('data-mbl', $elem.attr('data-mbl') + ' complete');
+          options.success(index, $elem);
+          if(options.sequential) loadImage(next);
+          data.count++; if(data.count >= data.total) options.complete();
+        });
 
-      },
+        // behavior on image error
+        $(img).one('error', function(){          
+          options.error(index, $elem);
+          if(options.sequential) loadImage(next);
+          data.count++; if(data.count >= data.total) options.complete();
+        });
 
-      // Load images all at once
-      FloodLoad : function() {
-        for(var i = 0; i < Data.total; i++) {
-          Self.LoadThis(i);
-        }
-      },
+        // set img src
+        img.src = src;
 
-      // Load images sequentially, one at time
-      SequentialLoad : function() {
-        Self.LoadThis(0);
-      },
-   
-      LoadThis : function(index) {
+        if(img.complete) $(img).load(); // ensure even cached image triggers load
 
-        var $ele = $(Data.$mbl[index]); // Get single mbl from index
-        var src  = $ele.data('src');    // Grab src
-        var next = index+1;
+      }
 
-        if(index < Data.total) {
+    };
 
-          var img = new Image(); // Create new image
-          img.src = src;         // Set the src 
-
-          $(img).one('load', function() {
-
-            // Set img src or set bg src
-            if(!Self.Options.bgMode) {
-              $ele.attr('src',src).addClass('mbl-complete');
-            } else {
-              $ele.css('background-image','url(\'' + src + '\')').addClass('mbl-complete');
-            }
-
-            Self.Options.callbacks.eachDone(index, $ele); // Fire callback for single image load
-            Data.count++; if(Data.count >= Data.total) Self.Options.callbacks.allDone(); // Fire callback for all images loaded, if true
-            
-            if(Self.Options.sequential) Self.LoadThis(next); // If using sequential mode, load the next image
-
-          }).one('error', function(e) {
-
-            Self.Options.callbacks.eachFail(index, $ele); // Fire failed callback
-
-            if(Self.Options.sequential) Self.LoadThis(next); // If using sequential mode, load the next image
-
-          });
-     
-          if(img.complete) $(img).load();
-
-        } // end if
-        
-      } // end LoadThis
-
-    }
-
-    return Self.Init(this);
+    return init(this);
 
   };
 
