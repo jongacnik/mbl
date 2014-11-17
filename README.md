@@ -18,11 +18,11 @@ Using the CommonJS module:
 
 	mbl(document, { // can pass in document (default) or any DOM element
 		selector   : '[data-mbl]', // selector for mbl elements
-		sequential : false, // load images all at once (default) or sequentially
-		bgMode     : false, // load images into image elements (default) or as a background-image
+		sequential : false, // load all at once (default) or sequentially
+		bgMode     : false, // load into <img src> (default) or as background-image
 		success    : function(i, elem){ }, // called on each image successful load
 		error      : function(i, elem){ }, // called on each image error
-		complete   : function(){ } // called once all images have completed (error/success agnostic)
+		complete   : function(){ } // called once all images have completed
 	});
 	
 Using jQuery plugin (jQuery not included as a dependency so include however you like):
@@ -53,8 +53,8 @@ and after MBL completes (assuming success) our DOM will look like:
 If `sequential` is set to **true**, the images will be loaded one-by-one, sequentially, as they appear in the DOM. Each image waits for the prior to complete (succeed or error) before it begins to load. Handy when a linear load sequence is desired, or load throttling for some other reason:
 
 	<img data-src="image.jpg" data-mbl>
-	<img data-src="other.jpg" data-mbl> // waits for image.jpg to load/error
-	<img data-src="third.jpg" data-mbl> // waits for image.jpg & third.jpg to load/error
+	<img data-src="other.jpg" data-mbl> // waits for image.jpg
+	<img data-src="third.jpg" data-mbl> // waits for image.jpg & third.jpg
 	// etc...	
 	
 ### Background Mode
@@ -66,15 +66,21 @@ Background mode, or `bgMode`, lets us place loaded images directly into the elem
 
 and after MBL completes (assuming success) if `bgMode` were set to **true**, our DOM will look like:
 
-	<span data-src="image.jpg" style="background-image:url('image.jpg');" data-mbl="complete"></span>
-	<span data-src="other.jpg" style="background-image:url('image.jpg');" data-mbl="complete"></span>
+	<span 
+		data-src="image.jpg" 
+		style="background-image:url('image.jpg');" 
+		data-mbl="complete"></span>
+	<span 
+		data-src="other.jpg" 
+		style="background-image:url('image.jpg');" 
+		data-mbl="complete"></span>
 	
 ## Multiple Instances
 
 You can have multiple instances of MBL on a single page without assigning to a variable or using the `new` keyword:
 
-	mbl(document.querySelector('.container')); // MBL will execute on the .container element
-	mbl(document.querySelector('.slider')); // MBL will execute on the .slider element
+	mbl(document.querySelector('.container')); // MBL will execute on .container
+	mbl(document.querySelector('.slider')); // MBL will execute on .slider
 	
 ## Support
 	
