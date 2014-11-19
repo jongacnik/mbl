@@ -4,7 +4,7 @@ MBL lets us use a `data-src` attribute on an element to load images in the DOM p
 
 ## Getting Started
 
-MBL comes in two flavors, a [CommonJS](http://www.commonjs.org/) dependency-free module (IE9+) for use in a [Browserify](http://browserify.org/) environment or as a [jQuery](http://jquery.com/) plugin (also CommonJS or AMD compatible). Either way:
+MBL comes in two flavors, a [CommonJS](http://www.commonjs.org/) dependency-free module (IE9+) for use in a [Browserify](http://browserify.org/) environment or as a [jQuery](http://jquery.com/) plugin. Either way:
 
 	npm install mbl
 
