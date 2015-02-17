@@ -15,6 +15,7 @@ module.exports = function(context, opts){
 
   var options = mextend({
     selector   : '[data-mbl]',
+    sourceAttr : 'data-src',
     sequential : false,
     bgMode     : false,
     success    : function(i, elem){ }, // called on each image successful load
@@ -55,7 +56,7 @@ module.exports = function(context, opts){
     if(index < data.total){
 
       var elem   = data.images[index];
-      var src    = elem.getAttribute('data-src');
+      var src    = elem.getAttribute(options.sourceAttr);
       var next   = index + 1;
       var img    = new Image(); // create new image
       var loaded = false;

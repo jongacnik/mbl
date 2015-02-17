@@ -17,6 +17,7 @@
 
     var options = $.extend({
       selector   : '[data-mbl]',
+      sourceAttr : 'data-src',
       sequential : false,
       bgMode     : false,
       success    : function(i, elem){ }, // called on each image successful load
@@ -55,7 +56,7 @@
       if(index < data.total){
 
         var $elem = $(data.images[index]);
-        var src   = $elem.attr('data-src');
+        var src   = $elem.attr(options.sourceAttr);
         var next  = index + 1;
         var img   = new Image(); // create new image
 
