@@ -1,6 +1,6 @@
 {
   "name": "mbl",
-  "version": "0.0.1",
+  "version": "0.1.4",
   "description": "MBL (Mad Basic Loader) loads images",
   "repository": {
     "type": "git",
