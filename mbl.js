@@ -2,121 +2,153 @@
  * MBL ~ Mad Basic Loader
  *
  * Functionality: 
- * - Loads images & fires callbacks
+ * - Loads images, fires callbacks & triggers events
  */
 
-module.exports = function(context, opts){
+var extend   = require('mextend')
+var trigger  = require('etrig')
+var sanitize = require('sanitize-elements')
+var Emitter  = require('tiny-emitter')
+
+module.exports = function($images, opts) {
+
+  var events = new Emitter()
+
+  var options = extend({
+    'sourceAttr' : 'data-src',
+    'sequential' : false,
+    'bgMode'     : false,
+    'success'    : function(i, elem) { }, // called on each image successful load
+    'error'      : function(i, elem) { }, // called on each image error
+    'begin'      : function() { }, // called once loading begins
+    'complete'   : function() { } // called once all images have completed (error/success agnostic)
+  }, opts)
 
   var data = {
-    images : [],
-    total  : 0,
-    count  : 0
-  };
+    'total' : 0,
+    'count' : 0
+  }
 
-  var options = mextend({
-    selector   : '[data-mbl]',
-    sourceAttr : 'data-src',
-    sequential : false,
-    bgMode     : false,
-    success    : function(i, elem){ }, // called on each image successful load
-    error      : function(i, elem){ }, // called on each image error
-    complete   : function(){ } // called once all images have completed (error/success agnostic)
-  }, opts);
-
-  function init(context){
-    context = context || document;
-    data.images = context.querySelectorAll(options.selector);
-    data.total = data.images.length;
-    kickoff();
-  };
-
-  function kickoff(){
-    if(data.total <= 0)
-      options.complete();
-    else {
-      if(!options.sequential)
-        flood();
-      else
-        sequential();
+  var init = function() {
+    if ($images = sanitize($images, true)) {
+      data.total = $images.length
+    } else {
+      console.warn('no images here!')
+      return
     }
-  };
+    kickoff()
+  }
 
-  function flood(){
-    for(var i = 0; i < data.total; i++)
-      loadImage(i);
-  };
+  var kickoff = function() {
+    begin()
+    if (data.total <= 0) {
+      complete()
+    } else {
+      if (!options.sequential) {
+        flood()
+      } else {
+        sequential()
+      }
+    }
+  }
 
-  function sequential(){
-    loadImage(0);
-  };
+  var flood = function() {
+    for (var i = 0; i < data.total; i++) {
+      loadImage(i)
+    }
+  }
+
+  var sequential = function() {
+    loadImage(0)
+  }
 
   // Should split up this function someday
-  function loadImage(index){
+  var loadImage = function(index) {
 
-    if(index < data.total){
+    if (index < data.total) {
 
-      var elem   = data.images[index];
-      var src    = elem.getAttribute(options.sourceAttr);
-      var next   = index + 1;
-      var img    = new Image(); // create new image
-      var loaded = false;
+      var elem   = $images[index]
+      var src    = elem.getAttribute(options.sourceAttr)
+      var next   = index + 1
+      var img    = new Image() // create new image
+      var loaded = false
 
       // behavior on image load
-      img.addEventListener('load', function(){
-        if(!loaded){
-          loaded = true;
-          if(!options.bgMode)
-            data.images[index].setAttribute('src',src);
-          else
-            elem.style.backgroundImage = "url('" + src + "')";
-          elem.setAttribute('data-mbl', elem.getAttribute('data-mbl') + ' complete');
-          options.success(index, elem);
-          if(options.sequential) loadImage(next);
-          data.count++; if(data.count >= data.total) options.complete();
+      img.addEventListener('load', function() {
+        if (!loaded) {
+          loaded = true
+          if (options.bgMode || elem.hasAttribute('data-bgmode')) {
+            elem.style.backgroundImage = "url('" + src + "')"
+          } else {
+            $images[index].setAttribute('src', src)
+          }
+          elem.setAttribute('data-mbl-complete', '')
+          success(index, elem)
+          if (options.sequential) {
+            loadImage(next)
+          }
+          data.count++ 
+          if (data.count >= data.total) {
+            complete()
+          }
         }
-      });
+      })
 
       // behavior on image error
-      img.addEventListener('error', function(){
-        if(!loaded){
-          loaded = true;
-          options.error(index, elem);
-          if(options.sequential) loadImage(next);
-          data.count++; if(data.count >= data.total) options.complete();
+      img.addEventListener('error', function() {
+        if (!loaded) {
+          loaded = true
+          error(index, elem)
+          if (options.sequential) {
+            loadImage(next)
+          }
+          data.count++ 
+          if (data.count >= data.total) {
+            complete()
+          }
         }
-      });
+      })
 
       // set img src
-      img.src = src;
+      img.src = src
 
-      if(img.complete) trigger(img, 'load'); // ensure even cached image triggers load
+      if (img.complete) {
+        etrig(img, 'load') // ensure even cached image triggers load
+      }
 
     }
 
-  };
+  }
 
-  function trigger(target, type){
-    var doc = document;
-    if (doc.createEvent) {
-      var event = new Event(type);
-      target.dispatchEvent(event);
-    } else {
-      var event = doc.createEventObject();
-      target.fireEvent('on' + type, event);
-    }
-  };
+  var success = function(index, elem) {
+    options.success(index, elem)
+    events.emit('success', {
+      'element' : elem,
+      'index' : index
+    })
+  }
 
-  function mextend(target, source){
-    target = target || {};
-    for(var prop in source) {
-      if(typeof source[prop] === 'object')
-        target[prop] = mextend(target[prop], source[prop]);
-      else
-        target[prop] = source[prop];
-    }
-    return target;
-  };
+  var error = function(index, elem) {
+    options.error(index, elem)
+    events.emit('error', {
+      'element' : elem,
+      'index' : index
+    })
+  }
 
-  return init(context);
+  var begin = function() {
+    options.begin()
+    events.emit('begin')
+  }
 
-};
+  var complete = function() {
+    options.complete()
+    events.emit('complete')
+  }
+
+  return {
+    'start' : init,
+    'on' : function(ev, cb){ events.on(ev, cb) }
+  }
+
+}

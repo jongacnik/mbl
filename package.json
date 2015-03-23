@@ -1,19 +1,25 @@
 {
   "name": "mbl",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "MBL (Mad Basic Loader) loads images",
   "repository": {
     "type": "git",
     "url": "https://github.com/amongiants/mbl"
   },
   "main": "mbl.js",
-  "dependencies": {},
+  "dependencies": {
+    "etrig": "^0.1.0",
+    "mextend": "^0.1.1",
+    "sanitize-elements": "^0.1.2",
+    "tiny-emitter": "^1.0.0"
+  },
   "keywords": [
     "load",
     "images",
     "preload",
     "sequence",
-    "callbacks"
+    "callbacks",
+    "events"
   ],
   "author": "Jon Gacnik <jon@folderstudio.com> (http://jongacnik.com/)",
   "license": "MIT",
