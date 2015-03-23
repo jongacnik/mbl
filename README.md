@@ -1,8 +1,8 @@
 # MBL (Mad Basic Loader)
 
-**If you use MBL, there has been some changes to usage!**
-
 MBL gives better control over image loading in the browser. Images can be loaded all at once or sequentially, they can be rendered as an image or set as the background image of an element. Callbacks/events are fired once image loading begins, as each image succeeds or fails, and once all images have loaded.
+
+**There has been some changes to usage with newest version 1.0.0**
 
 ## Getting Started
 
