@@ -113,7 +113,7 @@ module.exports = function($images, opts) {
       img.src = src
 
       if (img.complete) {
-        etrig(img, 'load') // ensure even cached image triggers load
+        trigger(img, 'load') // ensure even cached image triggers load
       }
 
     }
