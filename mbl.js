@@ -10,26 +10,26 @@ var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
 var Emitter  = require('tiny-emitter')
 
-module.exports = function($images, opts) {
+module.exports = function ($images, opts) {
 
   var events = new Emitter()
 
   var options = extend({
-    'sourceAttr' : 'data-src',
-    'sequential' : false,
-    'bgMode'     : false,
-    'success'    : function(i, elem) { }, // called on each image successful load
-    'error'      : function(i, elem) { }, // called on each image error
-    'begin'      : function() { }, // called once loading begins
-    'complete'   : function() { } // called once all images have completed (error/success agnostic)
+    sourceAttr : 'data-src',
+    sequential : false,
+    bgMode     : false,
+    success    : function (i, elem) { }, // called on each image successful load
+    error      : function (i, elem) { }, // called on each image error
+    begin      : function () { }, // called once loading begins
+    complete   : function () { } // called once all images have completed (error/success agnostic)
   }, opts)
 
   var data = {
-    'total' : 0,
-    'count' : 0
+    total : 0,
+    count : 0
   }
 
-  var init = function() {
+  var init = function () {
     if ($images = sanitize($images, true)) {
       data.total = $images.length
     } else {
@@ -37,9 +37,10 @@ module.exports = function($images, opts) {
       return
     }
     kickoff()
+    return this
   }
 
-  var kickoff = function() {
+  var kickoff = function () {
     begin()
     if (data.total <= 0) {
       complete()
@@ -52,18 +53,18 @@ module.exports = function($images, opts) {
     }
   }
 
-  var flood = function() {
+  var flood = function () {
     for (var i = 0; i < data.total; i++) {
       loadImage(i)
     }
   }
 
-  var sequential = function() {
+  var sequential = function () {
     loadImage(0)
   }
 
   // Should split up this function someday
-  var loadImage = function(index) {
+  var loadImage = function (index) {
 
     if (index < data.total) {
 
@@ -74,7 +75,7 @@ module.exports = function($images, opts) {
       var loaded = false
 
       // behavior on image load
-      img.addEventListener('load', function() {
+      img.addEventListener('load', function () {
         if (!loaded) {
           loaded = true
           if (options.bgMode || elem.hasAttribute('data-bgmode')) {
@@ -95,7 +96,7 @@ module.exports = function($images, opts) {
       })
 
       // behavior on image error
-      img.addEventListener('error', function() {
+      img.addEventListener('error', function () {
         if (!loaded) {
           loaded = true
           error(index, elem)
@@ -120,35 +121,35 @@ module.exports = function($images, opts) {
 
   }
 
-  var success = function(index, elem) {
+  var success = function (index, elem) {
     options.success(index, elem)
     events.emit('success', {
-      'element' : elem,
-      'index' : index
+      element : elem,
+      index : index
     })
   }
 
-  var error = function(index, elem) {
+  var error = function (index, elem) {
     options.error(index, elem)
     events.emit('error', {
-      'element' : elem,
-      'index' : index
+      element : elem,
+      index : index
     })
   }
 
-  var begin = function() {
+  var begin = function () {
     options.begin()
     events.emit('begin')
   }
 
-  var complete = function() {
+  var complete = function () {
     options.complete()
     events.emit('complete')
   }
 
   return {
-    'start' : init,
-    'on' : function(ev, cb){ events.on(ev, cb) }
+    start : init,
+    on : function(ev, cb){ events.on(ev, cb); return this }
   }
 
 }
