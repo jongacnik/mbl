@@ -1,6 +1,6 @@
 {
   "name": "mbl",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MBL (Mad Basic Loader) loads images",
   "repository": {
     "type": "git",
@@ -8,8 +8,8 @@
   },
   "main": "mbl.js",
   "dependencies": {
-    "etrig": "^0.1.0",
-    "mextend": "^0.1.1",
+    "etrig": "^1.0.0",
+    "extend": "^3.0.0",
     "sanitize-elements": "^0.1.2",
     "tiny-emitter": "^1.0.0"
   },

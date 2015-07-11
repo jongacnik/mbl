@@ -1,11 +1,11 @@
 /**
  * MBL ~ Mad Basic Loader
  *
- * Functionality: 
+ * Functionality:
  * - Loads images, fires callbacks & triggers events
  */
 
-var extend   = require('mextend')
+var extend   = require('extend')
 var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
 var Emitter  = require('tiny-emitter')
@@ -87,7 +87,7 @@ module.exports = function($images, opts) {
           if (options.sequential) {
             loadImage(next)
           }
-          data.count++ 
+          data.count++
           if (data.count >= data.total) {
             complete()
           }
@@ -102,7 +102,7 @@ module.exports = function($images, opts) {
           if (options.sequential) {
             loadImage(next)
           }
-          data.count++ 
+          data.count++
           if (data.count >= data.total) {
             complete()
           }
