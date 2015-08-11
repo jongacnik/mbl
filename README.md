@@ -6,7 +6,7 @@ MBL gives better control over image loading in the browser. Images can be loaded
 
 ## Getting Started
 
-MBL is best consumed in a [CommonJS](http://www.commonjs.org/), [Browserify](http://browserify.org/) environment (though there is a jQuery plugin version, details on that at the bottom):
+MBL is meant to be consumed in a [CommonJS](http://www.commonjs.org/), [Browserify](http://browserify.org/) environment (though you can also use a pre-bundled version, more below):
 
 	npm install mbl
 
@@ -24,10 +24,10 @@ MBL is best consumed in a [CommonJS](http://www.commonjs.org/), [Browserify](htt
 
 	// gather some images
 	var images = document.querySelectorAll('[data-mbl]')
-	
+
 	// setup
 	var imageload = mbl(images)
-	
+
 	// start!
 	imageload.start()
 
@@ -38,7 +38,7 @@ You can get more specific if you want (the following are defaults):
 	var imageload = mbl(images, {
 		'sourceAttr' : 'data-src' // attribute containing image source
 		'sequential' : false, // sequential mode (details below)
-		'bgMode'     : false, // background mode (details below)
+		'mode'       : 'src', // mbl mode (details below)
 		'success'    : function(index, elem) { }, // on each image load
 		'error'      : function(index, elem) { }, // on each image error
 		'begin'      : function() { } // once loading begins
@@ -71,7 +71,7 @@ Example HTML from above:
 
 	<img data-src="image.jpg" data-mbl>
 	<img data-src="other.jpg" data-mbl>
-	
+
 after MBL completes (assuming success) DOM becomes:
 
 	<img data-src="image.jpg" src="image.jpg" data-mbl-complete>
@@ -86,36 +86,51 @@ If `sequential` is set to **true**, the images are loaded sequentially, one by o
 	<img data-src="image.jpg" data-mbl>
 	<img data-src="other.jpg" data-mbl> // waits for image.jpg
 	<img data-src="third.jpg" data-mbl> // waits for other.jpg
-	// etc...	
-	
-### Background Mode
+	// etc...
 
-If `bgMode` is set to **true**, the source of the loaded image is set as the element's `background-image` style attribute rather than as the `src` attribute. This is handy for responsive images using `background-size: cover;`
+### MBL Mode ( src | background | load )
+
+Mode | Behavior
+--- | ---
+`src` | source of the loaded image is set as the `src` attribute
+`background` | source of the loaded image is set as the `background-image` style attribute
+`load` | no DOM changes, but callbacks/events fired
+
+This setting is handy for responsive images using `background-size: cover;`
 
 	<span data-src="image.jpg" data-mbl></span>
 	<span data-src="other.jpg" data-mbl></span>
 
-after MBL completes (assuming success) with `bgMode` DOM becomes:
+after MBL completes (assuming success) with `mode: background` DOM becomes:
 
-	<span 
-		data-src="image.jpg" 
-		style="background-image:url('image.jpg');" 
+	<span
+		data-src="image.jpg"
+		style="background-image:url('image.jpg');"
 		data-mbl-complete
 	></span>
-	<span 
-		data-src="other.jpg" 
-		style="background-image:url('other.jpg');" 
+	<span
+		data-src="other.jpg"
+		style="background-image:url('other.jpg');"
 		data-mbl-complete
 	></span>
 
-Background mode can also be enabled on an image by adding a `data-bgmode` attribute to the element.
+The mode can also be changed on an element basis by adding an attribute to the element:
 
-## jQuery	
+	<img
+		data-src="image.jpg"
+		data-mbl-mode="src|background|load"
+	>
 
-There's also a jQuery version of MBL. Basically the same but no events, just callbacks. Usage is very similar:
+## Bundled Version
+
+	If you don't want to mess with a build process you can also include the pre-bundled version found in `dist/mbl.bundled.js` in your project which exposes `mbl()` globally.
+
+## jQuery
+
+There's still an old jQuery version of MBL in `dist` as well. This hasn't been maintained but it's there for tinkering. Usage is:
 
 	var mbl = require('mbl/jquery.mbl.js'); // or just include as a script tag
-	
+
 	$('[data-mbl]').mbl({
 		'sequential' : false,
 		'bgMode'     : false,

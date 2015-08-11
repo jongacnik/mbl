@@ -1,6 +1,6 @@
 {
   "name": "mbl",
-  "version": "1.0.4",
+  "version": "1.1.4",
   "description": "MBL (Mad Basic Loader) loads images",
   "repository": {
     "type": "git",
@@ -28,6 +28,10 @@
   },
   "homepage": "https://github.com/amongiants/mbl",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-dist": "browserify mbl.js --s mbl > dist/mbl.bundled.js"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.1"
   }
 }

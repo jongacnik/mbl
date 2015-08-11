@@ -17,7 +17,7 @@ module.exports = function ($images, opts) {
   var options = extend({
     sourceAttr : 'data-src',
     sequential : false,
-    bgMode     : false,
+    mode       : 'src', // src, background, load/false
     success    : function (i, elem) { }, // called on each image successful load
     error      : function (i, elem) { }, // called on each image error
     begin      : function () { }, // called once loading begins
@@ -78,12 +78,16 @@ module.exports = function ($images, opts) {
       img.addEventListener('load', function () {
         if (!loaded) {
           loaded = true
-          if (options.bgMode || elem.hasAttribute('data-bgmode')) {
+          var mode = elem.getAttribute('data-mbl-mode') || options.mode
+          if (mode === 'load') {
+            // do nothing to dom
+          } else if (mode === 'background') {
             elem.style.backgroundImage = "url('" + src + "')"
+            elem.setAttribute('data-mbl-complete', '')
           } else {
             $images[index].setAttribute('src', src)
+            elem.setAttribute('data-mbl-complete', '')
           }
-          elem.setAttribute('data-mbl-complete', '')
           success(index, elem)
           if (options.sequential) {
             loadImage(next)
