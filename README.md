@@ -123,7 +123,7 @@ The mode can also be changed on an element basis by adding an attribute to the e
 
 ## Bundled Version
 
-	If you don't want to mess with a build process you can also include the pre-bundled version found in `dist/mbl.bundled.js` in your project which exposes `mbl()` globally.
+If you don't want to mess with a build process you can also include the pre-bundled version found in `dist/mbl.bundled.js` in your project which exposes `mbl()` globally.
 
 ## jQuery
 
