@@ -6,6 +6,7 @@
  * - Loads images, fires callbacks & triggers events
  */
 
+var imgload  = require('imgload')
 var extend   = require('extend')
 var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
@@ -19,8 +20,8 @@ module.exports = function ($images, opts) {
     sourceAttr : 'data-src',
     sequential : false,
     mode       : 'src', // src, background, load/false
-    success    : function (i, elem) { }, // called on each image successful load
-    error      : function (i, elem) { }, // called on each image error
+    success    : function (elem) { }, // called on each image successful load
+    error      : function (elem) { }, // called on each image error
     begin      : function () { }, // called once loading begins
     complete   : function () { } // called once all images have completed (error/success agnostic)
   }, opts)
@@ -69,27 +70,16 @@ module.exports = function ($images, opts) {
 
     if (index < data.total) {
 
-      var elem   = $images[index]
-      var src    = elem.getAttribute(options.sourceAttr)
-      var next   = index + 1
-      var img    = new Image() // create new image
-      var loaded = false
+      var imgloader = imgload($images[index], {
+        sourceAttr : options.sourceAttr,
+        mode       : options.mode,
+        error      : options.error,
+        load       : options.success
+      })
 
-      // behavior on image load
-      img.addEventListener('load', function () {
-        if (!loaded) {
-          loaded = true
-          var mode = elem.getAttribute('data-mbl-mode') || options.mode
-          if (mode === 'load') {
-            // do nothing to dom
-          } else if (mode === 'background') {
-            elem.style.backgroundImage = "url('" + src + "')"
-            elem.setAttribute('data-mbl-complete', '')
-          } else {
-            $images[index].setAttribute('src', src)
-            elem.setAttribute('data-mbl-complete', '')
-          }
-          success(index, elem)
+      imgloader
+        .on('error', function (img) {
+          error(img)
           if (options.sequential) {
             loadImage(next)
           }
@@ -97,14 +87,9 @@ module.exports = function ($images, opts) {
           if (data.count >= data.total) {
             complete()
           }
-        }
-      })
-
-      // behavior on image error
-      img.addEventListener('error', function () {
-        if (!loaded) {
-          loaded = true
-          error(index, elem)
+        })
+        .on('load', function (img) {
+          success(img)
           if (options.sequential) {
             loadImage(next)
           }
@@ -112,33 +97,24 @@ module.exports = function ($images, opts) {
           if (data.count >= data.total) {
             complete()
           }
-        }
-      })
-
-      // set img src
-      img.src = src
-
-      if (img.complete) {
-        trigger(img, 'load') // ensure even cached image triggers load
-      }
+        })
+        .start()
 
     }
 
   }
 
-  var success = function (index, elem) {
-    options.success(index, elem)
+  var success = function (elem) {
+    options.success(elem)
     events.emit('success', {
-      element : elem,
-      index : index
+      element : elem
     })
   }
 
-  var error = function (index, elem) {
-    options.error(index, elem)
+  var error = function (elem) {
+    options.error(elem)
     events.emit('error', {
-      element : elem,
-      index : index
+      element : elem
     })
   }
 
@@ -159,7 +135,7 @@ module.exports = function ($images, opts) {
 
 }
 
-},{"etrig":2,"extend":3,"sanitize-elements":7,"tiny-emitter":8}],2:[function(require,module,exports){
+},{"etrig":2,"extend":3,"imgload":4,"sanitize-elements":8,"tiny-emitter":9}],2:[function(require,module,exports){
 /**
  * @param target is any DOM Element or EventTarget
  * @param type Event type (i.e. 'click')
@@ -264,6 +240,110 @@ module.exports = function extend() {
 
 
 },{}],4:[function(require,module,exports){
+/**
+ * imgload
+ * Loads an image, manipulates dom, fires callbacks & triggers events
+ */
+
+var extend   = require('extend')
+var trigger  = require('etrig')
+var sanitize = require('sanitize-elements')
+var Emitter  = require('tiny-emitter')
+
+module.exports = function ($image, opts) {
+
+  var events = new Emitter()
+
+  var options = extend({
+    sourceAttr : 'data-src',
+    mode       : 'src', // src, background, load/false
+    begin      : function ($e) { }, // called on load begin
+    error      : function ($e) { }, // called on image error
+    load       : function ($e) { }  // called on image load
+  }, opts)
+
+  var init = function () {
+    if ($image = sanitize($image, true)) {
+      $image = $image[0] // ONE image
+    } else {
+      console.warn('no image here!')
+      return
+    }
+    begin($image)
+    loadImg($image)
+    return this
+  }
+
+  var loadImg = function ($e) {
+
+    var src = $e.getAttribute(options.sourceAttr)
+    var img = new Image()
+    var loaded = false
+
+    img.addEventListener('load', function () {
+      if (!loaded) {
+        loaded = true
+        var mode = $e.getAttribute('data-imgload-mode') || options.mode
+        if (mode === 'load') {
+          // do nothing to dom
+        } else if (mode === 'background') {
+          $e.style.backgroundImage = "url('" + src + "')"
+          $e.setAttribute('data-imgload-complete', '')
+        } else {
+          $e.setAttribute('src', src)
+          $e.setAttribute('data-imgload-complete', '')
+        }
+        load($e)
+      }
+    })
+
+    img.addEventListener('error', function () {
+      if (!loaded) {
+        loaded = true
+        error($e)
+      }
+    })
+
+    img.src = src
+
+    if (img.complete) {
+      trigger(img, 'load') // ensure cached image triggers load
+    }
+
+  }
+
+  var load = function ($e) {
+    options.load($e)
+    events.emit('load', {
+      element : $e
+    })
+    return this
+  }
+
+  var error = function ($e) {
+    options.error($e)
+    events.emit('error', {
+      element : $e
+    })
+    return this
+  }
+
+  var begin = function ($e) {
+    options.begin($e)
+    events.emit('begin', {
+      element : $e
+    })
+    return this
+  }
+
+  return {
+    start : init,
+    on : function(ev, cb){ events.on(ev, cb); return this }
+  }
+
+}
+
+},{"etrig":2,"extend":3,"sanitize-elements":8,"tiny-emitter":9}],5:[function(require,module,exports){
 
 /**
  * isArray
@@ -298,7 +378,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function(root) {
   function isElement(value) {
     return (value && value.nodeType === 1) &&
@@ -321,14 +401,14 @@ module.exports = isArray || function (val) {
 
 })(this);
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * @param $elements are dom element(s)
  * @param wrap true/false if single elements should be wrapped as array
@@ -377,7 +457,7 @@ module.exports = function($elements, wrap) {
   return $sanitized
 
 }
-},{"is-array":4,"is-element":5,"is-object":6}],8:[function(require,module,exports){
+},{"is-array":5,"is-element":6,"is-object":7}],9:[function(require,module,exports){
 function E () {
 	// Keep this empty so it's easier to inherit from
   // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)

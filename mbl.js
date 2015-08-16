@@ -1,10 +1,9 @@
 /**
  * MBL ~ Mad Basic Loader
- *
- * Functionality:
- * - Loads images, fires callbacks & triggers events
+ * Loads images, fires callbacks & triggers events
  */
 
+var imgload  = require('imgload')
 var extend   = require('extend')
 var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
@@ -18,8 +17,8 @@ module.exports = function ($images, opts) {
     sourceAttr : 'data-src',
     sequential : false,
     mode       : 'src', // src, background, load/false
-    success    : function (i, elem) { }, // called on each image successful load
-    error      : function (i, elem) { }, // called on each image error
+    success    : function (elem) { }, // called on each image successful load
+    error      : function (elem) { }, // called on each image error
     begin      : function () { }, // called once loading begins
     complete   : function () { } // called once all images have completed (error/success agnostic)
   }, opts)
@@ -68,27 +67,16 @@ module.exports = function ($images, opts) {
 
     if (index < data.total) {
 
-      var elem   = $images[index]
-      var src    = elem.getAttribute(options.sourceAttr)
-      var next   = index + 1
-      var img    = new Image() // create new image
-      var loaded = false
+      var imgloader = imgload($images[index], {
+        sourceAttr : options.sourceAttr,
+        mode       : options.mode,
+        error      : options.error,
+        load       : options.success
+      })
 
-      // behavior on image load
-      img.addEventListener('load', function () {
-        if (!loaded) {
-          loaded = true
-          var mode = elem.getAttribute('data-mbl-mode') || options.mode
-          if (mode === 'load') {
-            // do nothing to dom
-          } else if (mode === 'background') {
-            elem.style.backgroundImage = "url('" + src + "')"
-            elem.setAttribute('data-mbl-complete', '')
-          } else {
-            $images[index].setAttribute('src', src)
-            elem.setAttribute('data-mbl-complete', '')
-          }
-          success(index, elem)
+      imgloader
+        .on('error', function (img) {
+          error(img)
           if (options.sequential) {
             loadImage(next)
           }
@@ -96,14 +84,9 @@ module.exports = function ($images, opts) {
           if (data.count >= data.total) {
             complete()
           }
-        }
-      })
-
-      // behavior on image error
-      img.addEventListener('error', function () {
-        if (!loaded) {
-          loaded = true
-          error(index, elem)
+        })
+        .on('load', function (img) {
+          success(img)
           if (options.sequential) {
             loadImage(next)
           }
@@ -111,33 +94,24 @@ module.exports = function ($images, opts) {
           if (data.count >= data.total) {
             complete()
           }
-        }
-      })
-
-      // set img src
-      img.src = src
-
-      if (img.complete) {
-        trigger(img, 'load') // ensure even cached image triggers load
-      }
+        })
+        .start()
 
     }
 
   }
 
-  var success = function (index, elem) {
-    options.success(index, elem)
+  var success = function (elem) {
+    options.success(elem)
     events.emit('success', {
-      element : elem,
-      index : index
+      element : elem
     })
   }
 
-  var error = function (index, elem) {
-    options.error(index, elem)
+  var error = function (elem) {
+    options.error(elem)
     events.emit('error', {
-      element : elem,
-      index : index
+      element : elem
     })
   }
 

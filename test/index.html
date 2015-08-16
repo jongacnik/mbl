@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>imgload</title>
+  </head>
+  <body>
+
+    <img data-src="nice.jpg">
+    <img data-src="nice.jpg">
+    <div data-results></div>
+
+  <script src="../dist/mbl.bundled.js"></script>
+  <script>
+
+    window.$ = document.querySelectorAll.bind(document)
+
+    // setup
+    var imgload = mbl($('[data-src]'))
+
+    imgload
+      .on('begin', function () {
+        console.log('begin')
+        $('[data-results]')[0].appendChild(document.createTextNode("Begin... "))
+      })
+      .on('error', function (img) {
+        console.log('ERROR!!!!', img)
+        $('[data-results]')[0].appendChild(document.createTextNode("ERROR! "))
+      })
+      .on('success', function (img) {
+        console.log('load', img)
+        $('[data-results]')[0].appendChild(document.createTextNode("LOADED! "))
+      })
+      .on('complete', function () {
+        console.log('complete')
+        $('[data-results]')[0].appendChild(document.createTextNode("COMPLETE! "))
+      })
+      .start()
+
+  </script>
+  </body>
+</html>
