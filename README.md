@@ -36,13 +36,13 @@ MBL is meant to be consumed in a [CommonJS](http://www.commonjs.org/), [Browseri
 You can get more specific if you want (the following are defaults):
 
 	var imageload = mbl(images, {
-		'sourceAttr' : 'data-src' // attribute containing image source
-		'sequential' : false, // sequential mode (details below)
-		'mode'       : 'src', // mbl mode (details below)
-		'success'    : function(index, elem) { }, // on each image load
-		'error'      : function(index, elem) { }, // on each image error
-		'begin'      : function() { } // once loading begins
-		'complete'   : function() { } // once all images have completed
+		sourceAttr : 'data-src' // attribute containing image source
+		sequential : false, // sequential mode (details below)
+		mode       : 'src', // mbl mode (details below)
+		success    : function(elem) { }, // on each image load
+		error      : function(elem) { }, // on each image error
+		begin      : function() { } // once loading begins
+		complete   : function() { } // once all images have completed
 	})
 
 ### Events
@@ -74,8 +74,8 @@ Example HTML from above:
 
 after MBL completes (assuming success) DOM becomes:
 
-	<img data-src="image.jpg" src="image.jpg" data-mbl-complete>
-	<img data-src="other.jpg" src="other.jpg" data-mbl-complete>
+	<img data-src="image.jpg" src="image.jpg" data-imgload-complete>
+	<img data-src="other.jpg" src="other.jpg" data-imgload-complete>
 
 ## More about options
 
@@ -88,7 +88,7 @@ If `sequential` is set to **true**, the images are loaded sequentially, one by o
 	<img data-src="third.jpg" data-mbl> // waits for other.jpg
 	// etc...
 
-### MBL Mode ( src | background | load )
+### Load Mode ( src | background | load )
 
 Mode | Behavior
 --- | ---
@@ -106,19 +106,19 @@ after MBL completes (assuming success) with `mode: background` DOM becomes:
 	<span
 		data-src="image.jpg"
 		style="background-image:url('image.jpg');"
-		data-mbl-complete
+		data-imgload-complete
 	></span>
 	<span
 		data-src="other.jpg"
 		style="background-image:url('other.jpg');"
-		data-mbl-complete
+		data-imgload-complete
 	></span>
 
 The mode can also be changed on an element basis by adding an attribute to the element:
 
 	<img
 		data-src="image.jpg"
-		data-mbl-mode="src|background|load"
+		data-imgload-mode="src|background|load"
 	>
 
 ## Bundled Version
