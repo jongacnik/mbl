@@ -5,7 +5,6 @@
 
 var imgload  = require('imgload')
 var extend   = require('extend')
-var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
 var Emitter  = require('tiny-emitter')
 
@@ -17,10 +16,10 @@ module.exports = function ($images, opts) {
     sourceAttr : 'data-src',
     sequential : false,
     mode       : 'src', // src, background, load/false
-    success    : function (elem) { }, // called on each image successful load
+    success    : function (elem) { }, // called on each image load
     error      : function (elem) { }, // called on each image error
     begin      : function () { }, // called once loading begins
-    complete   : function () { } // called once all images have completed (error/success agnostic)
+    complete   : function () { }  // called once all images have completed (error/success agnostic)
   }, opts)
 
   var data = {
@@ -62,33 +61,35 @@ module.exports = function ($images, opts) {
     loadImage(0)
   }
 
-  // Should split up this function someday
   var loadImage = function (index) {
 
     if (index < data.total) {
 
-      var imgloader = imgload($images[index], {
-        sourceAttr : options.sourceAttr,
-        mode       : options.mode,
-        error      : options.error,
-        load       : options.success
-      })
+      var $img = $images[index]
+      var src  = $img.getAttribute(options.sourceAttr)
+
+      var imgloader = imgload(src)
 
       imgloader
-        .on('error', function (img) {
-          error(img)
-          if (options.sequential) {
-            loadImage(next)
-          }
-          data.count++
-          if (data.count >= data.total) {
-            complete()
-          }
+        .on('error', function () {
+          error($img)
         })
-        .on('load', function (img) {
-          success(img)
+        .on('load', function () {
+          var mode = $img.getAttribute('data-mbl-mode') || options.mode
+          if (mode !== 'load') {
+            if (mode === 'background') {
+              $img.style.backgroundImage = "url('" + src + "')"
+              $img.setAttribute('data-mbl-complete', '')
+            } else {
+              $img.setAttribute('src', src)
+              $img.setAttribute('data-mbl-complete', '')
+            }
+          }
+          success($img)
+        })
+        .on('always', function () {
           if (options.sequential) {
-            loadImage(next)
+            loadImage(index + 1)
           }
           data.count++
           if (data.count >= data.total) {

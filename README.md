@@ -2,7 +2,7 @@
 
 MBL gives better control over image loading in the browser. Images can be loaded all at once or sequentially, they can be rendered as an image or set as the background image of an element. Callbacks/events are fired once image loading begins, as each image succeeds or fails, and once all images have loaded.
 
-**There has been some changes to usage with newest version 1.0.0**
+Built on top of [imgload](https://www.npmjs.com/package/imgload) for simple image loading events.
 
 ## Getting Started
 
@@ -74,8 +74,8 @@ Example HTML from above:
 
 after MBL completes (assuming success) DOM becomes:
 
-	<img data-src="image.jpg" src="image.jpg" data-imgload-complete>
-	<img data-src="other.jpg" src="other.jpg" data-imgload-complete>
+	<img data-src="image.jpg" src="image.jpg" data-mbl-complete>
+	<img data-src="other.jpg" src="other.jpg" data-mbl-complete>
 
 ## More about options
 
@@ -88,7 +88,7 @@ If `sequential` is set to **true**, the images are loaded sequentially, one by o
 	<img data-src="third.jpg" data-mbl> // waits for other.jpg
 	// etc...
 
-### Load Mode ( src | background | load )
+### Loading Mode ( src | background | load )
 
 Mode | Behavior
 --- | ---
@@ -106,19 +106,19 @@ after MBL completes (assuming success) with `mode: background` DOM becomes:
 	<span
 		data-src="image.jpg"
 		style="background-image:url('image.jpg');"
-		data-imgload-complete
+		data-mbl-complete
 	></span>
 	<span
 		data-src="other.jpg"
 		style="background-image:url('other.jpg');"
-		data-imgload-complete
+		data-mbl-complete
 	></span>
 
 The mode can also be changed on an element basis by adding an attribute to the element:
 
 	<img
 		data-src="image.jpg"
-		data-imgload-mode="src|background|load"
+		data-mbl-mode="src|background|load"
 	>
 
 ## Bundled Version
@@ -142,4 +142,6 @@ There's still an old jQuery version of MBL in `dist` as well. This hasn't been m
 
 ## Todo
 
+- Sequential image throttling
+- Pause / resume sequential loads
 - Tests

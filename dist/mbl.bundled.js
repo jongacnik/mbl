@@ -1,14 +1,11 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.mbl = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
  * MBL ~ Mad Basic Loader
- *
- * Functionality:
- * - Loads images, fires callbacks & triggers events
+ * Loads images, fires callbacks & triggers events
  */
 
 var imgload  = require('imgload')
 var extend   = require('extend')
-var trigger  = require('etrig')
 var sanitize = require('sanitize-elements')
 var Emitter  = require('tiny-emitter')
 
@@ -20,10 +17,10 @@ module.exports = function ($images, opts) {
     sourceAttr : 'data-src',
     sequential : false,
     mode       : 'src', // src, background, load/false
-    success    : function (elem) { }, // called on each image successful load
+    success    : function (elem) { }, // called on each image load
     error      : function (elem) { }, // called on each image error
     begin      : function () { }, // called once loading begins
-    complete   : function () { } // called once all images have completed (error/success agnostic)
+    complete   : function () { }  // called once all images have completed (error/success agnostic)
   }, opts)
 
   var data = {
@@ -65,33 +62,35 @@ module.exports = function ($images, opts) {
     loadImage(0)
   }
 
-  // Should split up this function someday
   var loadImage = function (index) {
 
     if (index < data.total) {
 
-      var imgloader = imgload($images[index], {
-        sourceAttr : options.sourceAttr,
-        mode       : options.mode,
-        error      : options.error,
-        load       : options.success
-      })
+      var $img = $images[index]
+      var src  = $img.getAttribute(options.sourceAttr)
+
+      var imgloader = imgload(src)
 
       imgloader
-        .on('error', function (img) {
-          error(img)
-          if (options.sequential) {
-            loadImage(next)
-          }
-          data.count++
-          if (data.count >= data.total) {
-            complete()
-          }
+        .on('error', function () {
+          error($img)
         })
-        .on('load', function (img) {
-          success(img)
+        .on('load', function () {
+          var mode = $img.getAttribute('data-mbl-mode') || options.mode
+          if (mode !== 'load') {
+            if (mode === 'background') {
+              $img.style.backgroundImage = "url('" + src + "')"
+              $img.setAttribute('data-mbl-complete', '')
+            } else {
+              $img.setAttribute('src', src)
+              $img.setAttribute('data-mbl-complete', '')
+            }
+          }
+          success($img)
+        })
+        .on('always', function () {
           if (options.sequential) {
-            loadImage(next)
+            loadImage(index + 1)
           }
           data.count++
           if (data.count >= data.total) {
@@ -135,23 +134,7 @@ module.exports = function ($images, opts) {
 
 }
 
-},{"etrig":2,"extend":3,"imgload":4,"sanitize-elements":8,"tiny-emitter":9}],2:[function(require,module,exports){
-/**
- * @param target is any DOM Element or EventTarget
- * @param type Event type (i.e. 'click')
- */
-module.exports = function(target, type) {
-  var doc = document;
-  if (doc.createEvent) {
-    var event = document.createEvent("CustomEvent");
-    event.initCustomEvent(type, false, false, {});
-    target.dispatchEvent(event);
-  } else {
-    var event = doc.createEventObject();
-    target.fireEvent('on' + type, event);
-  }
-};
-},{}],3:[function(require,module,exports){
+},{"extend":2,"imgload":3,"sanitize-elements":8,"tiny-emitter":9}],2:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -239,69 +222,43 @@ module.exports = function extend() {
 };
 
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /**
  * imgload
- * Loads an image, manipulates dom, fires callbacks & triggers events
+ * Loads an image src and triggers events
  */
 
-var extend   = require('extend')
 var trigger  = require('etrig')
-var sanitize = require('sanitize-elements')
 var Emitter  = require('tiny-emitter')
 
-module.exports = function ($image, opts) {
+module.exports = function (src) {
 
   var events = new Emitter()
 
-  var options = extend({
-    sourceAttr : 'data-src',
-    mode       : 'src', // src, background, load/false
-    begin      : function ($e) { }, // called on load begin
-    error      : function ($e) { }, // called on image error
-    load       : function ($e) { }  // called on image load
-  }, opts)
+  function load () {
 
-  var init = function () {
-    if ($image = sanitize($image, true)) {
-      $image = $image[0] // ONE image
-    } else {
-      console.warn('no image here!')
-      return
-    }
-    begin($image)
-    loadImg($image)
-    return this
-  }
-
-  var loadImg = function ($e) {
-
-    var src = $e.getAttribute(options.sourceAttr)
     var img = new Image()
-    var loaded = false
 
     img.addEventListener('load', function () {
-      if (!loaded) {
-        loaded = true
-        var mode = $e.getAttribute('data-imgload-mode') || options.mode
-        if (mode === 'load') {
-          // do nothing to dom
-        } else if (mode === 'background') {
-          $e.style.backgroundImage = "url('" + src + "')"
-          $e.setAttribute('data-imgload-complete', '')
-        } else {
-          $e.setAttribute('src', src)
-          $e.setAttribute('data-imgload-complete', '')
-        }
-        load($e)
-      }
+      events
+        .emit('load', {
+          src : src
+        })
+        .emit('always', {
+          src : src,
+          result : 'load'
+        })
     })
 
     img.addEventListener('error', function () {
-      if (!loaded) {
-        loaded = true
-        error($e)
-      }
+      events
+        .emit('error', {
+          src : src
+        })
+        .emit('always', {
+          src : src,
+          result : 'error'
+        })
     })
 
     img.src = src
@@ -310,40 +267,34 @@ module.exports = function ($image, opts) {
       trigger(img, 'load') // ensure cached image triggers load
     }
 
-  }
-
-  var load = function ($e) {
-    options.load($e)
-    events.emit('load', {
-      element : $e
-    })
     return this
-  }
 
-  var error = function ($e) {
-    options.error($e)
-    events.emit('error', {
-      element : $e
-    })
-    return this
-  }
-
-  var begin = function ($e) {
-    options.begin($e)
-    events.emit('begin', {
-      element : $e
-    })
-    return this
   }
 
   return {
-    start : init,
-    on : function(ev, cb){ events.on(ev, cb); return this }
+    start : load,
+    on : function (ev, cb) { events.once(ev, cb); return this }
   }
 
 }
 
-},{"etrig":2,"extend":3,"sanitize-elements":8,"tiny-emitter":9}],5:[function(require,module,exports){
+},{"etrig":4,"tiny-emitter":9}],4:[function(require,module,exports){
+/**
+ * @param target is any DOM Element or EventTarget
+ * @param type Event type (i.e. 'click')
+ */
+module.exports = function(target, type) {
+  var doc = document;
+  if (doc.createEvent) {
+    var event = document.createEvent("CustomEvent");
+    event.initCustomEvent(type, false, false, {});
+    target.dispatchEvent(event);
+  } else {
+    var event = doc.createEventObject();
+    target.fireEvent('on' + type, event);
+  }
+};
+},{}],5:[function(require,module,exports){
 
 /**
  * isArray

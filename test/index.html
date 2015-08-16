@@ -6,8 +6,11 @@
   </head>
   <body>
 
-    <img data-src="nice.jpg">
-    <img data-src="nice.jpg">
+    <img data-src="http://40.media.tumblr.com/7a6e47d43e444f3c126cf7dfd1591a2d/tumblr_ns68sqqIVF1sd5ptso1_r1_1280.jpg">
+    <img data-src="http://40.media.tumblr.com/74a9417239aa6d879261856951031124/tumblr_ns68sqqIVF1sd5ptso2_1280.jpg">
+    <img data-src="http://41.media.tumblr.com/bf5e51df4bbf74ef269ed849cc697b2b/tumblr_ns68sqqIVF1sd5ptso3_1280.jpg">
+    <img data-src="http://41.media.tumblr.com/cd9d039b6f83cf6d60b011c48c84f401/tumblr_ns68sqqIVF1sd5ptso4_1280.jpg">
+    <img data-src="http://41.media.tumblr.com/d5e9688d69066218761003c3007f2d91/tumblr_ns68sqqIVF1sd5ptso6_1280.jpg">
     <div data-results></div>
 
   <script src="../dist/mbl.bundled.js"></script>
@@ -16,7 +19,10 @@
     window.$ = document.querySelectorAll.bind(document)
 
     // setup
-    var imgload = mbl($('[data-src]'))
+    var imgload = mbl($('[data-src]'), {
+      // mode : 'background',
+      // sequential : true
+    })
 
     imgload
       .on('begin', function () {
