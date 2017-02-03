@@ -2,29 +2,27 @@
  * MBL ~ Mad Basic Loader
  * Loads images, fires callbacks & triggers events
  */
-
-var imgload  = require('imgload')
-var extend   = require('extend')
+var imgload = require('imgload')
+var xtend = require('xtend')
 var sanitize = require('sanitize-elements')
-var Emitter  = require('tiny-emitter')
+var Emitter = require('tiny-emitter')
 
 module.exports = function ($images, opts) {
-
   var events = new Emitter()
 
-  var options = extend({
-    sourceAttr : 'data-src',
-    sequential : false,
-    mode       : 'src', // src, background, load/false
-    success    : function (elem) { }, // called on each image load
-    error      : function (elem) { }, // called on each image error
-    begin      : function () { }, // called once loading begins
-    complete   : function () { }  // called once all images have completed (error/success agnostic)
+  var options = xtend({
+    sourceAttr: 'data-src',
+    sequential: false,
+    mode: 'src', // src, background, load/false
+    success: function (elem) { }, // called on each image load
+    error: function (elem) { }, // called on each image error
+    begin: function () { }, // called once loading begins
+    complete: function () { }  // called once all images have completed (error/success agnostic)
   }, opts)
 
   var data = {
-    total : 0,
-    count : 0
+    total: 0,
+    count: 0
   }
 
   var init = function () {
@@ -62,11 +60,9 @@ module.exports = function ($images, opts) {
   }
 
   var loadImage = function (index) {
-
     if (index < data.total) {
-
       var $img = $images[index]
-      var src  = $img.getAttribute(options.sourceAttr)
+      var src = $img.getAttribute(options.sourceAttr)
 
       var imgloader = imgload(src)
 
@@ -97,22 +93,20 @@ module.exports = function ($images, opts) {
           }
         })
         .start()
-
     }
-
   }
 
   var success = function (elem) {
     options.success(elem)
     events.emit('success', {
-      element : elem
+      element: elem
     })
   }
 
   var error = function (elem) {
     options.error(elem)
     events.emit('error', {
-      element : elem
+      element: elem
     })
   }
 
@@ -127,8 +121,7 @@ module.exports = function ($images, opts) {
   }
 
   return {
-    start : init,
-    on : function(ev, cb){ events.on(ev, cb); return this }
+    start: init,
+    on: function(ev, cb) { events.on(ev, cb); return this }
   }
-
 }
