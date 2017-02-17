@@ -29,9 +29,11 @@
   "homepage": "https://github.com/amongiants/mbl",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-dist": "browserify mbl.js --s mbl > dist/mbl.bundled.js"
+    "build-dist": "browserify mbl.js --s mbl > dist/mbl.bundled.js",
+    "build-dist-min": "browserify mbl.js -g uglifyify --s mbl > dist/mbl.bundled.min.js"
   },
   "devDependencies": {
-    "browserify": "^11.0.1"
+    "browserify": "^11.2.0",
+    "uglifyify": "^3.0.4"
   }
 }
